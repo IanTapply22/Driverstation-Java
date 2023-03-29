@@ -1,15 +1,22 @@
 package me.iantapply;
 
 
+import me.iantapply.driverToRobot.DriverToRobot;
+import me.iantapply.driverToRobot.DriverToRobotCorePacket;
+
 import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
-import javax.jmdns.ServiceListener;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.nio.ByteBuffer;
+
+import static me.iantapply.utils.RobotDiscovery.findRobotIP;
 
 public class Main {
     public static InetAddress[] robotAddress = {null};
-
 
     public static void main(String[] args) throws Exception {
         // Create mock service that a roboRIO would have
@@ -22,54 +29,77 @@ public class Main {
         findRobotIP(1114);
     }
 
-    public static void findRobotIP(int teamNumber) throws Exception {
-        // Create new JmDNS instance
-        JmDNS jmdns = JmDNS.create();
+    /**
+     * Retrieves the team number set on the roboRIO via a socket connection to the roboRIO.
+     */
+    public static void sendTeamNumber() throws IOException {
+//        try {
+//            // Creates a socket connection to the rio via port 1735
+        Socket socket = new Socket(robotAddress[0].getHostName(), 1735);
+//
+//            // Create datastream to send a retrieve data through
+        OutputStream out = socket.getOutputStream();
+        InputStream in = socket.getInputStream();
+//
+//            // Initialize and send byte array
+//            byte[] request = new byte[]{(short) 15};
+//            System.out.println(request.length);
+//            out.write(request);
+//
+//            // Read and print response I get back from the rio after I send the byte array
+        byte[] response = new byte[1024];
+        int bytesRead = in.read(response);
+//            if (bytesRead >= 4 && response[0] == 0x0E && response[1] == 0x02) {
+        ByteBuffer buffer = ByteBuffer.wrap(response, 2, bytesRead - 2);
+//                buffer.order(ByteOrder.BIG_ENDIAN);
+        //out.write(buffer);
 
-        // Service info to look for
-        String serviceType = "_ni-rt._tcp.local.";
-        String serviceName = String.format("roboRIO-%d-FRC.%s", teamNumber, serviceType);
+        //buffer.putSho
 
-        ServiceListener listener = new ServiceListener() {
-            // Stop printing cannot find roboRIO when it has found one
-            boolean addressFound = false;
-
-            @Override
-            public void serviceAdded(ServiceEvent event) {}
-
-            @Override
-            public void serviceRemoved(ServiceEvent event) {}
-
-            @Override
-            public void serviceResolved(ServiceEvent event) {
-                String fullServiceName = event.getInfo().getQualifiedName();
-                if (fullServiceName.equalsIgnoreCase(serviceName) && !addressFound) {
-                    InetAddress[] addresses = event.getInfo().getInetAddresses();
-                    if (addresses.length > 0) {
-                        addressFound = true;
-                        robotAddress[0] = addresses[0];
-                        System.out.println("Found roboRIO at: " + robotAddress[0].getHostAddress());
-                    }
-                }
-            }
-        };
-
-        jmdns.addServiceListener(serviceType, listener);
-
-        /**
-         * Wait 5 seconds to give it time to look through all addresses and find the service name.
-         * I'm just sleeping the main thread and not running this on a separate thread because
-         * there shouldn't be any other processes running on the main thread .
-         */
-        Thread.sleep(5000);
-
-        jmdns.unregisterAllServices();
-        jmdns.close();
-
-        // If no address has been defined as the roboRIO's, then say that it can't find it.
-        if (robotAddress[0] == null) {
-            System.out.println("Cannot find roboRIO");
-        }
+        // Receiving
+//                var seq = buffer.getShort();
+//                var commVersion = buffer.get();
+//                var status = buffer.get();
+//                var trace = buffer.get();
+//                double battery;
+//                {
+//                    var intc =buffer.get();
+//                    var decc = buffer.get();
+//                    battery = intc + decc / 255.0;
+//                }
+//                boolean requestTime = buffer.get() == 1;
+//                int bytesLeft = bytesRead - 8;
+//                while (bytesLeft > 0 ){
+//                    int len = buffer.get();
+//                    byte code = buffer.get();
+//                    var tagBuffer = ByteBuffer.wrap(response, 7, len);
+//                    bytesLeft -= len;
+//                    switch (code){
+//                        case 0x01 -> {
+//
+//                        }
+//                        default ->  {
+//                            throw new RuntimeException("Invalid code: " + code);
+//                        }
+//                    }
     }
 
+
+    // Sending
+//            buffer.putShort((short)12); // short = 2 bytes (length 2)
+//            buffer.put(1); (comm version; always 1)
+//            buffer.put(-1); // control
+//            buffer.put(-1); // request
+//            buffer.put(-1); // alience
+
+    // -1 placeholder
+
+
+//                int teamNumber = buffer.getShort();
+//                System.out.println("Team number: " + teamNumber);
+//            }
+//            socket.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 }
