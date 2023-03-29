@@ -6,6 +6,7 @@ import me.iantapply.Main;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,15 +36,15 @@ public class DriverToRobotCorePacket {
     /**
      * Control setting for the RoboRIO, the mask is as follows.
      * [e-stop enabled][ds attached][reserved][brownout protection][fms attached][enabled][mode bit 1][mode bit 2]
-     * Example: 0b01100100
+     * Example: 0b01100000
      * - 0b represents it's a byte
      * - 0 means e-stop is off
      * - 1 means ds attached but what's the point
-     * - 1 is something weird, always needs to be 1
+     * - 0 is something weird, always needs to be 0
      * - 0 brownout protection off
      * - 0 means fms isn't attached
      * - 1 means it's enabled
-     * - the last two zero's represent that it's in teleop (00 is teleop, 01 is test, and 02 is autonomous)
+     * - the last two zero's represent that it's in teleop (00 is teleop, 01 is test, and 10 is autonomous)
      */
     @Getter
     private byte controlByte;
@@ -181,8 +182,6 @@ public class DriverToRobotCorePacket {
             // Control byte (various mode settings, e-stop, brownout, and enabling)
             buffer.put(this.getControlByte());
 
-            buffer.put((byte) 0);
-
             // Default request byte (nothing)
             byte requestByte = 0b00000000;
             // Set the reboot bit
@@ -250,15 +249,21 @@ public class DriverToRobotCorePacket {
                 ByteBuffer bb = ByteBuffer.wrap(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
 
                 short seq = bb.getShort();
+                if (seq > this.getSequenceNumber()) {
+                    System.out.println("\u001B[31m" + "Packet dropped!");
+                }
                 byte commVersion = bb.get();
                 byte status = bb.get();
                 byte trace = bb.get();
+                System.out.print(status + "\n");
+
                 double battery;
                 {
                     byte intc = bb.get();
                     byte decc = bb.get();
                     battery = (intc & 0xFF) + (decc & 0xFF) / 256.0;
-                    System.out.printf("Battery Voltage: %.2f\n", battery);
+                    DecimalFormat decfor = new DecimalFormat("0.00");
+                    System.out.print("\rBattery Voltage: " + decfor.format(battery));
                 }
                 boolean requestTime = bb.get() == 1;
                 int bytesLeft = bb.remaining();
@@ -274,16 +279,17 @@ public class DriverToRobotCorePacket {
 
                         }
                         case 0x04 -> {
-                            System.out.println("Disk Free: " + tagBuffer.getLong());
+                            //System.out.println("Disk Free (MB): " + tagBuffer.getLong());
+
                         }
                         case 0x05 -> {
-                            System.out.println("CPU Info: " + tagBuffer.getFloat());
+                            //System.out.println("CPU Info: " + tagBuffer.getFloat());
                         }
                         case 0x06 -> {
-                            System.out.println("RAM Used: " + tagBuffer.getLong());
+                            //System.out.println("RAM Used: " + tagBuffer.getLong());
                         }
                         default -> {
-                            System.out.println("wenis");
+                            System.out.println("Invalid tag received: " + code);
                         }
                     }
                 }

@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 public class RobotDiscovery {
     static boolean searchOn = true;
     static int searchCount = 0;
+    static boolean found = false;
     static InetAddress[] searchedAddresses = {null};
 
     public static void findRobotIP(int teamNumber) throws IOException, InterruptedException {
@@ -31,7 +32,6 @@ public class RobotDiscovery {
                 // Create a ServiceListener to handle service events
                 ServiceListener listener = new ServiceListener() {
                     // Stop printing "cannot find roboRIO" when one is found
-                    boolean found = false;
 
                     @Override
                     public void serviceAdded(ServiceEvent event) {
@@ -52,9 +52,8 @@ public class RobotDiscovery {
                                 Main.robotAddress[0] = addresses[0];
                                 System.out.println("Found roboRIO at: " + addresses[0].getHostAddress());
 
-                                DriverToRobotCorePacket coreSendingPacket = new DriverToRobotCorePacket.DriverToRobotCorePacketBuilder((short) DriverToRobot.sequenceNumber, (byte) 0b01100100, (byte) 0x00000000).build();
                                 try {
-                                    coreSendingPacket.sendPacketToBuffer();
+                                    DriverToRobot.sendPacketToBuffer();
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }
