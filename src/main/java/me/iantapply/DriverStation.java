@@ -113,7 +113,7 @@ public class DriverStation extends JFrame implements ActionListener {
 
         // Mode selection button toggling
         } else if (e.getSource() == teleopButton) {
-            testButton.setSelected(true);
+            teleopButton.setSelected(true);
             PacketVariables.setMode(Modes.TELEOP);
         } else if (e.getSource() == autonomousButton) {
             autonomousButton.setSelected(true);

@@ -2,6 +2,7 @@ package me.iantapply;
 
 
 import me.iantapply.utils.RobotDiscovery;
+import net.java.games.input.*;
 
 import java.io.IOException;
 import java.io.InputStream;
