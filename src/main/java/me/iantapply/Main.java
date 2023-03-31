@@ -1,19 +1,14 @@
 package me.iantapply;
 
 
-import me.iantapply.driverToRobot.DriverToRobot;
-import me.iantapply.driverToRobot.DriverToRobotCorePacket;
+import me.iantapply.utils.RobotDiscovery;
 
-import javax.jmdns.JmDNS;
-import javax.jmdns.ServiceInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
-
-import static me.iantapply.utils.RobotDiscovery.findRobotIP;
 
 public class Main {
     public static InetAddress[] robotAddress = {null};
@@ -26,7 +21,9 @@ public class Main {
 
         // Print looking for rio and then start finding it
         System.out.println("Looking for roboRIO...");
-        findRobotIP(1114);
+        new DriverStation();
+
+        RobotDiscovery.findRobotIP(1114);
     }
 
     /**

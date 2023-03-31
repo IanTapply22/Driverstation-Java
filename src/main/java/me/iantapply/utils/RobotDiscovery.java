@@ -2,15 +2,12 @@ package me.iantapply.utils;
 
 import me.iantapply.Main;
 import me.iantapply.driverToRobot.DriverToRobot;
-import me.iantapply.driverToRobot.DriverToRobotCorePacket;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceListener;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 public class RobotDiscovery {
     static boolean searchOn = true;
@@ -47,6 +44,7 @@ public class RobotDiscovery {
                         if (fullName.equalsIgnoreCase(serviceName) && !found) {
                             InetAddress[] addresses = event.getInfo().getInet4Addresses();
                             if (addresses.length > 0) {
+                                DriverStationConstants.setConnectionStatus("Robot Connected With IP: " + addresses[0].getHostAddress());
                                 found = true;
                                 searchedAddresses[0] = addresses[0];
                                 Main.robotAddress[0] = addresses[0];

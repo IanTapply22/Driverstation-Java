@@ -1,6 +1,7 @@
 package me.iantapply.utils;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -34,18 +35,29 @@ public class PacketVariables {
      * - 0 brownout protection off
      * - 0 means fms isn't attached
      * - 1 means it's enabled
-     * - the last two zero's represent that it's in teleop (00 is teleop, 01 is test, and 10 is autonomous)
+     * - the last two zero's represent that it's in teleop (00 is teleop, 01 is test, and 11 is autonomous)
      */
-
-    // Default (off and does nothing)
     @Getter
-    public static byte controlByte = 0b01000000;
-
+    @Setter
+    public static boolean estopEnabled = false;
+    @Getter
+    @Setter
+    public static boolean brownoutProtectionEnabled = false;
+    @Getter
+    @Setter
+    public static boolean fmsAttached = false;
+    @Getter
+    @Setter
+    public static boolean isEnabled = false;
+    @Getter
+    @Setter
+    public static Modes mode = Modes.TELEOP;
     /**
      * Request byte values
      * Just made this boolean optional values because there's only two
      */
     @Getter
+    @Setter
     public static boolean shouldRebootRoboRIO = false;
     @Getter
     public static boolean shouldRestartCode = false;
@@ -59,6 +71,9 @@ public class PacketVariables {
     /**
      * Tags to send along with the packet
      */
+
     @Getter
-    public static byte[] tags;
+    @Setter
+    public static String battery = "0.00";
+
 }

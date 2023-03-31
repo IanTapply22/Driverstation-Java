@@ -15,7 +15,7 @@ public class DriverToRobot {
 
     public static void sendPacketToBuffer() throws IOException {
         // Open datagram sending socket on UDP port 1110
-        DatagramSocket socket = new DatagramSocket(1110);
+        DatagramSocket socket = new DatagramSocket();
         byte[] IPAddress = Main.robotAddress[0].getAddress();
         //byte[] IPAddress = {127, 0, 0, 1};
         InetAddress address = InetAddress.getByAddress(IPAddress);
@@ -33,7 +33,26 @@ public class DriverToRobot {
             // Comm version (always 1)
             buffer.put(PacketVariables.getCommVersion());
             // Control byte (various mode settings, e-stop, brownout, and enabling)
-            buffer.put(PacketVariables.getControlByte());
+            byte controlByte = 0b01000000;
+            if (PacketVariables.isEstopEnabled()) {
+                controlByte |= 0b11000000;
+            }
+            if (PacketVariables.isBrownoutProtectionEnabled()) {
+                controlByte |= 0b01010000;
+            }
+            if (PacketVariables.isFmsAttached()) {
+                controlByte |= 0b01001000;
+            }
+            if (PacketVariables.isEnabled()) {
+                controlByte |= 0b01000100;
+            }
+            switch (PacketVariables.getMode()) {
+                case TELEOP -> controlByte |= 0b01000000;
+                case AUTON -> controlByte |= 0b01000010;
+                case PRACTICE -> controlByte |= 0b01000000; // TODO
+                case TEST -> controlByte |= 0b01000001;
+            }
+            buffer.put(controlByte);
 
             // Default request byte (nothing)
             byte requestByte = 0b00000000;
@@ -53,11 +72,14 @@ public class DriverToRobot {
             buffer.put(PacketVariables.allianceByte);
 
             // For each tag that's included (optional), add it to the buffer
-            if (PacketVariables.tags != null) {
-                for (int i = 0; i <= PacketVariables.tags.length; i++) {
-                    buffer.put(PacketVariables.tags[i]); // Put each tag byte in the buffer
-                }
-            }
+            buffer.put((byte) 5);
+            buffer.put((byte) 7);
+            buffer.putFloat(System.nanoTime() / 1000000000.0f);
+
+            // tiem data
+            buffer.put((byte) 4);
+            buffer.put((byte) 0x10);
+            buffer.put("EST".getBytes());
 
             // Construct packet being sent
             DatagramPacket packet = new DatagramPacket(buffer.array(), buffer.position(), address, 1110);
@@ -73,7 +95,7 @@ public class DriverToRobot {
             long endTime = System.currentTimeMillis();
             long difference = endTime - startTime;
             //System.out.println("Packet time to send: " + difference + " milliseconds");
-            //this.printPacketDetails(requestByte);
+            //System.out.println("beans");
         }, 0, 20, TimeUnit.MILLISECONDS);
 
 
@@ -83,7 +105,6 @@ public class DriverToRobot {
 //        }
 
 
-        DatagramSocket serverSocket = new DatagramSocket(1150, InetAddress.getByName("0.0.0.0"));
         byte[] receiveData = new byte[1024];
 
         DatagramPacket receivePacket = new DatagramPacket(receiveData,
@@ -91,20 +112,14 @@ public class DriverToRobot {
 
         while(true)
         {
+            DatagramSocket serverSocket = new DatagramSocket(1150);
             serverSocket.receive(receivePacket);
-//                System.out.println("asldkjasdlkjasdkjlasdlkjasdlkjaf");
-//                {
-//                    var data = receivePacket.getData();
-//                    for (Byte b : data){
-//                        System.out.println(b);
-//                    }
-//                }
             ByteBuffer bb = ByteBuffer.wrap(receivePacket.getData(), receivePacket.getOffset(), receivePacket.getLength());
 
             short seq = bb.getShort();
-            if (seq > PacketVariables.getSequenceNumber()) {
-                System.out.println("\u001B[31m" + "Packet dropped!");
-            }
+//            if (seq > PacketVariables.getSequenceNumber()) {
+//                System.out.println("\n \u001B[31m" + "Packet dropped!\n");
+//            }
             byte commVersion = bb.get();
             byte status = bb.get();
             byte trace = bb.get();
@@ -116,6 +131,7 @@ public class DriverToRobot {
                 byte decc = bb.get();
                 battery = (intc & 0xFF) + (decc & 0xFF) / 256.0;
                 DecimalFormat decfor = new DecimalFormat("0.00");
+                PacketVariables.setBattery(decfor.format(battery));
                 System.out.print("\rBattery Voltage: " + decfor.format(battery));
             }
             boolean requestTime = bb.get() == 1;
@@ -146,6 +162,7 @@ public class DriverToRobot {
                     }
                 }
             }
+            serverSocket.close();
         }
         // should close serverSocket in finally block
     }
