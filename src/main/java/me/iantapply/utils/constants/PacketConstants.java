@@ -1,12 +1,13 @@
-package me.iantapply.utils;
+package me.iantapply.utils.constants;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.iantapply.utils.Modes;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class PacketVariables {
+public class PacketConstants {
 
     // Timer to send every 20ms
     public static ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -75,5 +76,20 @@ public class PacketVariables {
     @Getter
     @Setter
     public static String battery = "0.00";
+    @Getter
+    @Setter
+    public static Long diskFree = 0L;
+    @Getter
+    @Setter
+    public static Long ramFree = 0L;
+    @Getter
+    @Setter
+    public static boolean brownoutProtectionOn = false;
+
+
+    /**
+     * Gamepad stuff
+     */
+
 
 }

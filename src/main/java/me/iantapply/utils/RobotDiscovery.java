@@ -2,6 +2,7 @@ package me.iantapply.utils;
 
 import me.iantapply.Main;
 import me.iantapply.driverToRobot.DriverToRobot;
+import me.iantapply.utils.constants.DriverStationConstants;
 
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceEvent;
@@ -48,7 +49,7 @@ public class RobotDiscovery {
                                 found = true;
                                 searchedAddresses[0] = addresses[0];
                                 Main.robotAddress[0] = addresses[0];
-                                System.out.println("Found roboRIO at: " + addresses[0].getHostAddress());
+                                System.out.println("Found roboRIO at: " + Main.robotAddress[0].getHostAddress());
 
                                 try {
                                     DriverToRobot.sendPacketToBuffer();
@@ -71,12 +72,6 @@ public class RobotDiscovery {
                 // Remove the ServiceListener and close the JmDNS instance
                 jmdns.removeServiceListener(serviceType, listener);
                 jmdns.close();
-
-                if(searchCount >= 5) {
-                    searchOn = false;
-                    System.out.println("Failed after 5 attempts!");
-                }
-
 
                 // If no address has been defined as the roboRIO's, then say that it can't find it.
                 if (searchedAddresses[0] == null) {

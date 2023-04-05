@@ -1,4 +1,4 @@
-package me.iantapply.utils;
+package me.iantapply.utils.constants;
 
 import lombok.Getter;
 import lombok.Setter;
