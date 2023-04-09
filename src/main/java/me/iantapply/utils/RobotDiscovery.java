@@ -21,7 +21,7 @@ public class RobotDiscovery {
 
             if (searchedAddresses[0] == null) {
                 // Create a JmDNS instance
-                JmDNS jmdns = JmDNS.create(InetAddress.getLocalHost());
+                JmDNS jmdns = JmDNS.create(InetAddress.getByName("127.0.0.1"));
 
                 // Specify the service type and name to look for
                 String serviceType = "_ni-rt._tcp.local.";

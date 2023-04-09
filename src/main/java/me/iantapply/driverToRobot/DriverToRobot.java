@@ -21,9 +21,20 @@ public class DriverToRobot {
      * @param butt bruh??
      * @param pressed BrUh!?!!
      */
-    public static void bruh(int butt,  boolean pressed){
-        butt -=1;
+    public static void bruh(int butt, boolean pressed){
+        //butt += 2;
         if (pressed) {
+            buttonBytes[butt / 8] |= (1 << (butt % 8));
+            //buttonBytes[butt >> 3] |= (1 << (butt & 0b111));
+        } else {
+            buttonBytes[butt / 8] &= ~(1 << (butt % 8));
+            //buttonBytes[butt >> 3] &= ~(1 << (butt & 0b111));
+        }
+    }
+
+    public static void bruh(int butt, float triggerValue){
+        //butt -= 1;
+        if (triggerValue > 0) {
             buttonBytes[butt / 8] |= (1 << (butt % 8));
             //buttonBytes[butt >> 3] |= (1 << (butt & 0b111));
         } else {
@@ -48,16 +59,17 @@ public class DriverToRobot {
         PacketConstants.executor.scheduleAtFixedRate(() -> {
             ByteBuffer buffer = ByteBuffer.allocate(1024);
 
-            bruh(10, Gamepad.controllers.getState(0).a);
-            bruh(9, Gamepad.controllers.getState(0).b);
-            bruh(8, Gamepad.controllers.getState(0).y);
-            bruh(7, Gamepad.controllers.getState(0).x);
-            bruh(5, Gamepad.controllers.getState(0).start);
-            bruh(5, Gamepad.controllers.getState(0).start);
-            bruh(5, Gamepad.controllers.getState(0).start);
-            bruh(5, Gamepad.controllers.getState(0).start);
-            bruh(5, Gamepad.controllers.getState(0).start);
-            bruh(5, Gamepad.controllers.getState(0).start);
+            // Set the buttons as their values in the byte array
+            bruh(1, Gamepad.controllers.getState(0).a);
+            bruh(2, Gamepad.controllers.getState(0).b);
+            bruh(3, Gamepad.controllers.getState(0).y);
+            bruh(4, Gamepad.controllers.getState(0).x);
+            bruh(5, Gamepad.controllers.getState(0).leftTrigger);
+            bruh(6, Gamepad.controllers.getState(0).rightTrigger);
+            bruh(7, Gamepad.controllers.getState(0).guide);
+            bruh(8, Gamepad.controllers.getState(0).start);
+            bruh(9, Gamepad.controllers.getState(0).leftStickClick);
+            bruh(10, Gamepad.controllers.getState(0).rightStickClick);
 
             /**
              * REQUIRED CORE DATA
